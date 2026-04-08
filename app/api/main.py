@@ -6,13 +6,10 @@ from pydantic import BaseModel
 
 from app.retrieval.vectordb import index_pdf
 from app.retrieval.rag_chain import generate_answer
+from app.utils.config import RAW_DATA_DIR
 
 
 app = FastAPI(title="AI Agent Copilot API")
-
-
-RAW_DATA_DIR = Path("data/raw")
-RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 
 class QueryRequest(BaseModel):
@@ -27,9 +24,6 @@ def root():
 
 @app.post("/upload")
 async def upload_document(file: UploadFile = File(...)):
-    """
-    Upload a PDF file and index it into ChromaDB.
-    """
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are supported right now.")
 
@@ -53,9 +47,6 @@ async def upload_document(file: UploadFile = File(...)):
 
 @app.post("/query")
 def query_documents(request: QueryRequest):
-    """
-    Query indexed documents and return a grounded answer.
-    """
     try:
         result = generate_answer(request.question, k=request.top_k)
         return result
