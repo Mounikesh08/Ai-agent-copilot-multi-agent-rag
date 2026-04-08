@@ -4,10 +4,10 @@ import shutil
 from fastapi import FastAPI, HTTPException, UploadFile, File
 from pydantic import BaseModel
 
-app = FastAPI(title="AI Agent Copilot API")
+from app.retrieval.vectordb import index_pdf
+from app.utils.config import RAW_DATA_DIR
 
-RAW_DATA_DIR = Path("data/raw")
-RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
+app = FastAPI(title="AI Agent Copilot API")
 
 
 class QueryRequest(BaseModel):
@@ -31,18 +31,18 @@ async def upload_document(file: UploadFile = File(...)):
         with file_path.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
+        indexing_result = index_pdf(str(file_path))
+
         return {
-            "message": "Upload route is working",
+            "message": "File uploaded and indexed successfully",
             "file_name": file.filename,
-            "indexing_result": {
-                "file_path": str(file_path),
-                "pages_loaded": 0,
-                "chunks_created": 0,
-                "documents_stored": 0
-            }
+            "indexing_result": indexing_result,
         }
 
     except Exception as e:
+        import traceback
+        print("UPLOAD ERROR:")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -51,8 +51,11 @@ def query_documents(request: QueryRequest):
     try:
         return {
             "question": request.question,
-            "answer": "Backend query route is working. Full RAG will be added next.",
+            "answer": "Stage 3 is live. Upload, PDF loading, chunking, embeddings, and vector storage are now working. Retrieval and real answering will be added next.",
             "sources": []
         }
     except Exception as e:
+        import traceback
+        print("QUERY ERROR:")
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))

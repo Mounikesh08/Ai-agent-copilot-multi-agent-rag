@@ -1,4 +1,5 @@
 import sys
+import os
 from pathlib import Path
 
 import requests
@@ -8,8 +9,7 @@ ROOT_DIR = Path(__file__).resolve().parents[2]
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from app.utils.config import API_BASE_URL
-
+API_BASE_URL = os.getenv("API_BASE_URL", "http://127.0.0.1:8000")
 
 st.set_page_config(page_title="AI Agent Copilot", layout="wide")
 
@@ -82,6 +82,8 @@ if st.button("Get Answer"):
                     )
                 else:
                     st.error(f"Query failed: {response.text}")
+                    st.write("Status code:", response.status_code)
+                    st.write("Raw response:", response.text)
 
             except requests.exceptions.ConnectionError:
                 st.error("Could not connect to backend. Make sure FastAPI is running.")
