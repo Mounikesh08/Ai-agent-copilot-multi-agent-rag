@@ -21,7 +21,7 @@ def format_context(docs) -> str:
 
 def get_llm():
     if not OPENAI_API_KEY:
-        raise ValueError("OPENAI_API_KEY is missing. Add it to your .env file.")
+        raise ValueError("OPENAI_API_KEY is missing. Add it to your .env file or deployment environment.")
 
     return ChatOpenAI(
         model=LLM_MODEL,
@@ -64,6 +64,7 @@ Question:
                 "source": doc.metadata.get("source"),
                 "page_number": doc.metadata.get("page_number"),
                 "chunk_id": doc.metadata.get("chunk_id"),
+                "preview": doc.page_content[:300]
             }
             for doc in retrieved_docs
         ],

@@ -5,6 +5,7 @@ from fastapi import FastAPI, HTTPException, UploadFile, File
 from pydantic import BaseModel
 
 from app.retrieval.vectordb import index_pdf
+from app.retrieval.rag_chain import generate_answer
 from app.utils.config import RAW_DATA_DIR
 
 app = FastAPI(title="AI Agent Copilot API")
@@ -49,11 +50,9 @@ async def upload_document(file: UploadFile = File(...)):
 @app.post("/query")
 def query_documents(request: QueryRequest):
     try:
-        return {
-            "question": request.question,
-            "answer": "Stage 3 is live. Upload, PDF loading, chunking, embeddings, and vector storage are now working. Retrieval and real answering will be added next.",
-            "sources": []
-        }
+        result = generate_answer(request.question, k=request.top_k)
+        return result
+
     except Exception as e:
         import traceback
         print("QUERY ERROR:")
